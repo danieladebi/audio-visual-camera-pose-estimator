@@ -1,0 +1,9 @@
+torchrun --nproc_per_node=8 train.py \
+    --train_dataset "EgoExo4D(split='train', use_yamnet_embed=True, use_policy_model=True, sound_size=1000, resolution=(512, 96))" \
+    --test_dataset "EgoExo4D(split='val', use_yamnet_embed=True, use_policy_model=True, sound_size=1000, resolution=(512, 96), seed=777)" \
+    --model "PolicyClassificationModel()" \
+    --lr 1e-3 --min_lr 1e-6 --warmup_epochs 0 --epochs 100 --batch_size 256 --accum_iter 1 \
+    --save_freq 10 --keep_freq 10 --eval_freq 1 \
+    --train_criterion "PolicyBCELoss()" \
+    --test_criterion "PolicyBCELoss()" \
+    --output_dir "checkpoints/_egoexo4d-policy_1000ms_yamnet_embed_"

@@ -7,14 +7,18 @@
  ·
 <a href="https://www.cs.utexas.edu/~grauman/">Kristen Grauman</a>
 </p>
+<div align="center"> The University of Texas at Austin 
 
-<p>
+
+<h3>
 <a href="https://vision.cs.utexas.edu/projects/av_camera_pose/"><strong>Project Page</strong></a>
 &nbsp;|&nbsp;
 <a href="https://arxiv.org/abs/2512.12165"><strong>arXiv</strong></a>
-</p>
+</h3>
 
-This repository contains the code, trained model, and result files for the project.
+</div>
+
+This repository contains the code and instructions to train our model for this project.
 
 ## Abstract
 

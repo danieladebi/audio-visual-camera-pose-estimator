@@ -24,10 +24,6 @@ This repository contains the code and instructions to train our model for this p
 
 ## Overview
 
-<p align="center">
-<img src="full_method_diagram.png" width="90%">
-</p>
-
 
 We extend a vision-only relative-pose regressor (built on [Reloc3r](https://github.com/ffrivera0/reloc3r) / [DUSt3R](https://github.com/naver/dust3r)) with audio cues derived from the scene's ambient sound. Our released method fuses, for each image pair from the [Ego-Exo4D](https://ego-exo4d-data.org/) dataset:
 
@@ -36,8 +32,11 @@ We extend a vision-only relative-pose regressor (built on [Reloc3r](https://gith
 - **DOA** — direction-of-arrival spectrums of the ambient audio, and
 - **Binaural embeddings** — self-supervised binaural audio features
 
-into a single relative-pose prediction. The diagram above displays our full method architecture.
+into a single relative-pose prediction. The diagram below displays our full method architecture.
 
+<p align="center">
+<img src="full_method_diagram.png" width="90%">
+</p>
 
 
 ## Table of Contents

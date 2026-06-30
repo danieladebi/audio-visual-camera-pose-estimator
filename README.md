@@ -9,50 +9,44 @@
 </p>
 <div align="center"> The University of Texas at Austin 
 
-
 <h3>
 <a href="https://vision.cs.utexas.edu/projects/av_camera_pose/"><strong>Project Page</strong></a>
 &nbsp;|&nbsp;
 <a href="https://arxiv.org/abs/2512.12165"><strong>arXiv</strong></a>
 </h3>
-
 </div>
+
+<p align="center">
+<img src="eccv_av_cpe_2026.png" width="80%">
+</p>
 
 This repository contains the code and instructions to train our model for this project.
 
-## Abstract
-
-Understanding camera motion is a fundamental problem in embodied perception and 3D scene
-understanding. While visual methods have advanced rapidly, they often struggle under visually
-degraded conditions such as motion blur or occlusions. In this work, we show that passive scene
-sounds provide cues complementary to vision for relative camera pose estimation for in-the-wild
-videos. We introduce a simple but effective audio-visual framework that integrates
-direction-of-arrival (DOA) spectra and binauralized embeddings into a state-of-the-art vision-only
-pose estimation model. Our results on two large datasets show consistent gains over strong visual
-baselines, plus robustness when the visual information is corrupted. To our knowledge, this
-represents the first work to successfully leverage audio for relative camera pose estimation in
-real-world videos, and it establishes incidental, everyday audio as an unexpected but promising
-signal for a classic spatial challenge.
-
 ## Overview
 
+<p align="center">
+<img src="full_method_diagram.png" width="90%">
+</p>
+
+
 We extend a vision-only relative-pose regressor (built on [Reloc3r](https://github.com/ffrivera0/reloc3r) / [DUSt3R](https://github.com/naver/dust3r)) with audio cues derived from the scene's ambient sound. Our released method fuses, for each image pair from the [Ego-Exo4D](https://ego-exo4d-data.org/) dataset:
+
 
 - **Vision** — the two RGB frames,
 - **DOA** — direction-of-arrival spectrums of the ambient audio, and
 - **Binaural embeddings** — self-supervised binaural audio features
 
-into a single relative-pose prediction.
+into a single relative-pose prediction. The diagram above displays our full method architecture.
+
+
 
 ## Table of Contents
 
-- [Abstract](#abstract)
 - [Overview](#overview)
 - [Installation](#installation)
 - [Data: Ego-Exo4D](#data-ego-exo4d)
 - [Training](#training)
 - [Evaluation](#evaluation)
-- [Results files](#results-files)
 - [Citation](#citation)
 - [Acknowledgments](#acknowledgments)
 
@@ -175,7 +169,6 @@ useful in your research, please cite:
 ## Acknowledgments
 
 Built on top of [Reloc3r](https://github.com/ffrivera0/reloc3r), [DUSt3R](https://github.com/naver/dust3r),
-and [CroCo](https://github.com/naver/croco). Audio features build on self-supervised localization-from-motion
-(SLfM) and direction-of-arrival estimation. Data from [Ego-Exo4D](https://ego-exo4d-data.org/).
+and [CroCo](https://github.com/naver/croco). Audio features build on self-supervised localization-from-motion (SLfM) and direction-of-arrival estimation. Data from [Ego-Exo4D](https://ego-exo4d-data.org/).
 
 

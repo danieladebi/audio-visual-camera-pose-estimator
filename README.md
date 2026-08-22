@@ -141,13 +141,6 @@ That folder contains three files:
   (comma-separated, no "all" shortcut — the snippet lists every take under the Ego-Exo4D audio
   root); add `--device cpu` if no GPU is available.
 
-  > [!NOTE]
-  > This encoder was **trained from scratch on Ego-Exo4D** for this release — the original cache
-  > used to train `egoexo4d-av_cpe.pth` no longer exists and its exact generation recipe wasn't
-  > recoverable, so this is a re-implementation of the SLfM mono→binaural pretext idea
-  > ([IFICL/SLfM](https://github.com/IFICL/SLfM)), not a byte-for-byte reproduction. It's only
-  > been validated at small scale so far, so results from the released [evaluation](#evaluation)
-  > command may vary somewhat from the paper's reported numbers.
 
 **How the caches were generated (for reproducing or extending them yourself):**
 

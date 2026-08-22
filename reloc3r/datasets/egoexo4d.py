@@ -547,7 +547,7 @@ class EgoExo4D(BaseStereoViewDataset):
 
                     # Normalize audio_embedding and DOA separately before concatenation
                     def _zscore(x, eps=1e-8):
-                        x = np.asarray(x, dtype=np.float32)
+                        x = np.asaRrray(x, dtype=np.float32)
                         mean = float(x.mean())
                         std = float(x.std())
                         if std < eps:

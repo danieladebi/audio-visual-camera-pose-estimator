@@ -44,6 +44,7 @@ into a single relative-pose prediction. The diagram below displays our full meth
 - [Overview](#overview)
 - [Installation](#installation)
 - [Data: Ego-Exo4D](#data-ego-exo4d)
+- [Downloading pretrained audio caches & checkpoints](#downloading-pretrained-audio-caches--checkpoints)
 - [Training](#training)
 - [Evaluation](#evaluation)
 - [Citation](#citation)
@@ -77,7 +78,8 @@ cd ../../../
 
 4. Download the DUSt3R backbone weights used to initialize training and place them at
 `checkpoints/DUSt3R_ViTLarge_BaseDecoder_512_dpt.pth`
-(available from the [DUSt3R](https://github.com/naver/dust3r) project). This file is required for **training** only; evaluation loads the trained checkpoint shipped under `checkpoints/` (see below).
+(available from the [DUSt3R](https://github.com/naver/dust3r) project). This file is required for **training** only; evaluation loads the released checkpoint instead (`checkpoints/` is not committed to
+the repo — see [Downloading pretrained audio caches & checkpoints](#downloading-pretrained-audio-caches--checkpoints)).
 
 ## Data: Ego-Exo4D
 
@@ -92,10 +94,76 @@ After downloading, point the dataset loader at your local copy. The relevant pat
 - `DATA_ROOT` — root of the processed Ego-Exo4D camera-pose / audio data (frames, `camera_poses/`, `doa/`).
 - `pairs_path` — the precomputed list of frame pairs per split.
 
-The audio **embeddings/DOA caches** (the `embeddings_*` directories) are *not* shipped — they are
-large and regenerable. The dataset reads them, per take, from a directory named by the
-`embedding_type` argument (e.g. `embeddings_doa_1000ms/`) relative to the repository root.
-Regenerate these features from your Ego-Exo4D download before training/evaluating.
+The audio **embeddings/DOA caches** (the `embeddings_*` directories) are *not* committed to this
+repository — they are large and regenerable. The dataset reads them, per take, from a directory
+named by the `embedding_type` argument relative to the repository root — e.g. the released method
+uses `embedding_type='embeddings_doa_1000ms_alt'`. You can either regenerate these caches yourself
+(see below) or download pre-generated copies (see
+[next section](#downloading-pretrained-audio-caches--checkpoints)).
+
+## Downloading pretrained audio caches & checkpoints
+
+Pre-generated audio caches and checkpoints are hosted here (Google Drive):
+**https://drive.google.com/drive/folders/122WEX7rsZCkld0oehP0fM4STukqShc9d?usp=drive_link**
+
+That folder contains three files:
+
+- **`egoexo4d-av_cpe.pth`** — the released model checkpoint itself (vision + SLfM embeddings +
+  DOA, the method described in the paper). Place it at
+  `checkpoints/_egoexo4d-vision_slfm_embed_and_doa_360_1000ms-512_/checkpoint-last.pth` — that
+  exact path is what `setup_reloc3r_relpose_model()` in `reloc3r/reloc3r_relpose.py` loads for
+  this configuration (see [Evaluation](#evaluation)).
+
+- **`embeddings_doa_1000ms_alt.zip`** — the DOA spectra. Nothing else. One 360-dim
+  direction-of-arrival azimuth spectrum (pyroomacoustics NormMUSIC) per frame, saved as
+  `doa_{take_name}_{frame_id:06d}.pt`. Unzip it at the repo root — it extracts directly to
+  `embeddings_doa_1000ms_alt/{take_name}/doa_*.pt`, exactly where `egoexo4d.py` reads it from.
+
+- **`binaural_model.zip`** — the mono→binaural (SLfM-style) audio encoder *model weights*, not
+  embeddings. Unzip it at the repo root — it extracts to
+  `checkpoints/slfm_m2b_egoexo4d/{checkpoint-best.pth,checkpoint-last.pth}`.
+
+  **To turn these weights into the actual embeddings the checkpoint needs at eval time**, run:
+
+  ```bash
+  python datasets_preprocess/generate_embeddings_slfm_egoexo4d.py \
+      --checkpoint checkpoints/slfm_m2b_egoexo4d/checkpoint-best.pth \
+      --takes "$(ls /vision/vision_data_2/egoexo4d_audio/camera_pose_audio_data/audio | paste -sd, -)"
+  ```
+
+  The path in that command is specific to the internal machine this was generated on — swap it
+  for your own Ego-Exo4D audio root.
+
+  This writes one 1024-dim embedding per frame to
+  `embeddings_slfm_egoexo4d/{take_name}/embedding1_{label}.pt` /
+  `embedding2_{label}.pt` — the other half of the audio input the model expects (concatenated
+  with the 360-dim DOA vector above into a 1384-dim vector). `--takes` is required
+  (comma-separated, no "all" shortcut — the snippet lists every take under the Ego-Exo4D audio
+  root); add `--device cpu` if no GPU is available.
+
+  > [!NOTE]
+  > This encoder was **trained from scratch on Ego-Exo4D** for this release — the original cache
+  > used to train `egoexo4d-av_cpe.pth` no longer exists and its exact generation recipe wasn't
+  > recoverable, so this is a re-implementation of the SLfM mono→binaural pretext idea
+  > ([IFICL/SLfM](https://github.com/IFICL/SLfM)), not a byte-for-byte reproduction. It's only
+  > been validated at small scale so far, so results from the released [evaluation](#evaluation)
+  > command may vary somewhat from the paper's reported numbers.
+
+**How the caches were generated (for reproducing or extending them yourself):**
+
+1. `datasets_preprocess/generate_embeddings_doa_1000ms_alt.py` — reads the already-computed
+   per-frame NormMUSIC DOA arrays cached under Ego-Exo4D's processed data root
+   (`DATA_ROOT/doa/{take_name}/doa_{frame_id:06d}_duration_1000ms.npy`) and repackages the subset
+   referenced by the train/val frame-pairs pickles into `embeddings_doa_1000ms_alt/`.
+2. `datasets_preprocess/train_slfm_m2b_egoexo4d.py` — trains the mono→binaural audio encoder:
+   mono conditioning audio is the mean of the 7-channel Ego-Exo4D mic array, the binaural target
+   is the array's last two channels, and the model learns to reconstruct the binaural spectrogram
+   from mono via a complex-mask U-Net (SLfM's `CondAudioEncoder` + `AudioCondUNet` architecture).
+3. `datasets_preprocess/generate_embeddings_slfm_egoexo4d.py` — runs the trained encoder over each
+   frame's own audio clip and saves the pooled 1024-dim bottleneck feature as both
+   `embedding1_{label}.pt` and `embedding2_{label}.pt` under `embeddings_slfm_egoexo4d/{take_name}/`
+   (the loader uses the `embedding1_`/`embedding2_` prefix to pick a source- vs. target-role file
+   for the same frame, not two different embeddings).
 
 ## Training
 
@@ -125,8 +193,10 @@ train/eval variants (audio-only, DOA-only, vision-only, SLfM-HM3D, policy models
 
 ## Evaluation
 
-A trained checkpoint for the released method is shipped under
-`checkpoints/_egoexo4d-vision_slfm_embed_and_doa_360_1000ms-512_/`. Evaluate it on Ego-Exo4D with:
+A trained checkpoint for the released method goes under
+`checkpoints/_egoexo4d-vision_slfm_embed_and_doa_360_1000ms-512_/checkpoint-last.pth` (download
+`egoexo4d-av_cpe.pth` and place it there — see
+[above](#downloading-pretrained-audio-caches--checkpoints)). Evaluate it on Ego-Exo4D with:
 
 ```bash
 bash scripts/eval_egoexo4d_slfm_embed_and_doa_360_vision.sh

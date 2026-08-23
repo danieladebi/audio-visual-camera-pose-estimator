@@ -13,6 +13,8 @@
 <a href="https://vision.cs.utexas.edu/projects/av_camera_pose/"><strong>Project Page</strong></a>
 &nbsp;|&nbsp;
 <a href="https://arxiv.org/abs/2512.12165"><strong>arXiv</strong></a>
+&nbsp;|&nbsp;
+<a href="https://drive.google.com/drive/folders/122WEX7rsZCkld0oehP0fM4STukqShc9d?usp=drive_link"><strong>Data & Models</strong></a>
 </h3>
 </div>
 

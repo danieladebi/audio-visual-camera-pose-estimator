@@ -5,6 +5,9 @@ checkpoints/
 embeddings_*/
 embeddings_*.zip
 binaural_model.zip
+camera_pose_audio_data.zip
+.dataset_staging/
+datasets_preprocess/build_camera_pose_audio_data_zip.py
 video_prediction_errs_*/
 result_poses/
 frame_pairs/
